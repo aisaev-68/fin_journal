@@ -1,6 +1,5 @@
 import unittest
 from main import FinanceApp
-from journal import FinanceJournal
 from manager import FileManager
 
 
