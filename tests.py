@@ -39,6 +39,16 @@ class TestFinanceApp(unittest.TestCase):
 
 class TestFinanceJournal(unittest.TestCase):
 
+    def setUp(self):
+
+        with open("data/incomes.txt", "w") as incomes_file:
+            incomes_file.write("/1=2024-04-30/2=Доход/3=1500.0/4=Зарплата аванс\n")
+            incomes_file.write("/1=2024-04-30/2=Доход/3=2000.0/4=Зарплата\n")
+
+        with open("data/expenses.txt", "w") as expenses_file:
+            expenses_file.write("/1=2024-04-30/2=Расход/3=1500.0/4=Покупка продуктов\n")
+            expenses_file.write("/1=2024-04-30/2=Расход/3=2000.0/4=Покупка чего то\n")
+
     def test_get_incomes(self):
         journal = FileManager("data/incomes.txt", "data/expenses.txt")
         expected_incomes = [1500.0, 2000.0]
