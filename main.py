@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from journal import FinanceJournal
+from validator import Validator
 
 
 class FinanceApp:
@@ -17,73 +16,23 @@ class FinanceApp:
             expenses_filename (str): Имя файла для хранения данных о расходах.
         """
         self.journal = FinanceJournal(incomes_filename, expenses_filename)
-
-    @staticmethod
-    def validate_date(date: str) -> str | None:
-        """
-        Валидация даты.
-
-        Args:
-            date (str): Введенная пользователем дата.
-
-        Returns:
-            str: Валидная дата в формате 'год-месяц-день' или None, если валидация не пройдена.
-        """
-        try:
-            datetime.strptime(date, '%Y-%m-%d')
-            return date
-        except ValueError:
-            print("Ошибка: Неверный формат даты. Используйте формат 'год-месяц-день' (например, '2024-05-02').")
-            return None
-
-    @staticmethod
-    def validate_category(category: str) -> str | None:
-        """
-        Валидация категории.
-
-        Args:
-            category (str): Введенная пользователем категория.
-
-        Returns:
-            str: Валидная категория или None, если валидация не пройдена.
-        """
-
-        if category.capitalize() not in ["Расход", "Доход"]:
-            print("Ошибка: категория может быть либо 'Расход', либо 'Доход'.")
-            return None
-        return category
-
-    @staticmethod
-    def validate_amount(amount: str) -> float | None:
-        """
-        Валидация суммы.
-
-        Args:
-            amount (str): Введенная пользователем сумма.
-
-        Returns:
-            str: Валидная сумма или None, если валидация не пройдена.
-        """
-        try:
-            return float(amount)
-        except ValueError:
-            print("Ошибка: сумма должна быть вещественным числом.")
-            return None
+        self.validator = Validator()
 
     def input_data(self, flag=True) -> str:
         """Ввод данных из консоли."""
 
-        category = self.validate_category(input("Введите категорию (Доход/Расход): ").capitalize())
+        category = self.validator.validate_category(
+            input("Введите категорию (Доход/Расход): ").capitalize())
         while category is None:
-            category = self.validate_category(input("Введите категорию (Доход/Расход): "))
+            category = self.validator.validate_category(input("Введите категорию (Доход/Расход): "))
 
-        date = self.validate_date(input("Введите дату: "))
+        date = self.validator.validate_date(input("Введите дату: "))
         while date is None:
-            date = self.validate_date(input("Введите дату: "))
+            date = self.validator.validate_date(input("Введите дату: "))
 
-        amount = self.validate_amount(input("Введите сумму: "))
+        amount = self.validator.validate_amount(input("Введите сумму: "))
         while amount is None:
-            amount = self.validate_amount(input("Введите сумму: "))
+            amount = self.validator.validate_amount(input("Введите сумму: "))
         record = f"/1={date}/2={category.capitalize()}/3={str(amount)}"
         if flag:
             description = input("Введите описание: ")

@@ -1,5 +1,6 @@
-import os
 from typing import List, Dict
+
+from manager import FileManager
 
 
 class FinanceJournal:
@@ -15,23 +16,15 @@ class FinanceJournal:
             incomes_filename (str): Имя файла для хранения данных о доходах.
             expenses_filename (str): Имя файла для хранения данных о расходах.
         """
-        self.incomes_filename = incomes_filename
-        self.expenses_filename = expenses_filename
 
-        if not os.path.exists(self.incomes_filename):
-            with open(self.incomes_filename, 'w') as f:
-                pass
-
-        if not os.path.exists(self.expenses_filename):
-            with open(self.expenses_filename, 'w') as f:
-                pass
+        self.file_manager = FileManager(incomes_filename, expenses_filename)
 
     def show_balance(self) -> None:
         """
         Вывод текущего баланса, суммы доходов и расходов.
         """
-        incomes = self._get_incomes()
-        expenses = self._get_expenses()
+        incomes = self.file_manager.get_incomes()
+        expenses = self.file_manager.get_expenses()
         total_income = sum(incomes)
         total_expense = sum(expenses)
         balance = total_income - total_expense
@@ -46,8 +39,8 @@ class FinanceJournal:
         Args:
             record str: Строка с данными записи.
         """
-        incomes = self._get_incomes()
-        expenses = self._get_expenses()
+        incomes = self.file_manager.get_incomes()
+        expenses = self.file_manager.get_expenses()
         total_income = sum(incomes)
         total_expense = sum(expenses)
         data = record.split("/")
@@ -55,13 +48,7 @@ class FinanceJournal:
             if data[2].split("=")[1] == "Расход" else 0
 
         if total_income >= new_sum_expence:
-
-            filename = self.incomes_filename if data[2].split("=")[1] == "Доход" \
-                else self.expenses_filename
-
-            with open(filename, 'a') as file:
-                file.write(record)
-
+            self.file_manager.write_record(record)
         else:
             print(f"Ошибка: Сумма расходов превышает сумму доходов на "
                   f"{abs(total_income - new_sum_expence)}")
@@ -75,103 +62,30 @@ class FinanceJournal:
             search_record (str): Запись, которую нужно изменить.
             new_record (Dict[str, str]): Словарь с новыми данными для записи.
         """
-        filename = self.incomes_filename if search_record.split("/")[2].split("=")[1] == "Доход" \
-            else self.expenses_filename
-        with open(filename, 'r+') as file:
-            lines = file.readlines()
-            for line in lines:
-                if search_record in line:
-                    file.seek(0)
-                    ind = lines.index(line)
-                    lines[ind] = new_record
-                    file.writelines(lines)
-                    file.truncate()
-                    break
+
+        self.file_manager.edit_record(search_record, new_record)
 
     def search_record(self, search_data: str) -> str | None:
         """
         Поиск записи по заданному критерию.
 
         Args:
-            search_criteria (str): Критерий поиска.
+            search_data (str): Критерий поиска.
 
         Returns:
             str: Найденная запись или None.
         """
 
-        filename = self.incomes_filename \
-            if search_data.split("/")[2].split("=")[1] == "Доход" \
-            else self.expenses_filename
-        with open(filename, 'r') as file:
-            lines = file.readlines()
-            found_line = None
-            for line in lines:
-                if search_data in line:
-                    found_line = line
-                    break
-            return found_line if found_line else None
+        return self.file_manager.search_record(search_data)
 
     def search_records(self, search_data: str) -> List[str]:
         """
         Поиск записей по критериям.
 
         Args:
-            search_criteria (str): Критерий поиска.
+            search_data (str): Критерий поиска.
 
         Returns:
             str: Найденные записи.
         """
-
-        filename = self.incomes_filename \
-            if search_data.split("/")[2].split("=")[1] == "Доход" \
-            else self.expenses_filename
-        with open(filename, 'r') as file:
-            lines = file.readlines()
-            found_lines = []
-            data = search_data.split("/")
-            for line in lines:
-                if data[1].split("=")[1] == line.split("/")[1].split("=")[1] \
-                        or data[3].split("=")[1] == line.split("/")[3].split("=")[1]:
-                    found_lines.append(line)
-
-            return found_lines
-
-    def _get_incomes(self) -> List[float]:
-        """
-        Получение списка доходов.
-
-        Returns:
-            List[float]: Список доходов.
-        """
-        incomes = []
-
-        with open(self.incomes_filename, 'r') as file:
-            lines = file.readlines()
-        for line in lines:
-            fields = line.strip().split("/")
-            if len(fields) == 5:
-                amount = float(fields[3].split("=")[1])
-                if fields[2].split("=")[1] == "Доход":
-                    incomes.append(amount)
-
-        return incomes
-
-    def _get_expenses(self) -> List[float]:
-        """
-        Получение списка расходов.
-
-        Returns:
-            List[float]: Список расходов.
-        """
-
-        expenses = []
-
-        with open(self.expenses_filename, 'r') as file:
-            lines = file.readlines()
-        for line in lines:
-            fields = line.strip().split("/")
-            if len(fields) == 5:
-                amount = float(fields[3].split("=")[1])
-                if fields[2].split("=")[1] == "Расход":
-                    expenses.append(amount)
-        return expenses
+        return self.file_manager.search_records(search_data)
