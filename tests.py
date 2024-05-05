@@ -48,6 +48,11 @@ class TestFinanceJournal(unittest.TestCase):
             expenses_file.write("/1=2024-04-30/2=Расход/3=1500.0/4=Покупка продуктов\n")
             expenses_file.write("/1=2024-04-30/2=Расход/3=2000.0/4=Покупка чего то\n")
 
+    def tearDown(self):
+        import os
+        os.remove("data/incomes.txt")
+        os.remove("data/expenses.txt")
+
     def test_get_incomes(self):
         journal = FileManager("data/incomes.txt", "data/expenses.txt")
         expected_incomes = [1500.0, 2000.0]
