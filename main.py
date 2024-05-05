@@ -90,7 +90,7 @@ class FinanceApp:
                 if matching_records:
                     print("\n-----Найдены следующие записи-----")
                     for i, record in enumerate(matching_records):
-                        print(f"Запись № {i}")
+                        print(f"Запись № {i + 1}")
                         print("Категория: ", record.split("/")[2].split("=")[1])
                         print("Дата: ", record.split("/")[1].split("=")[1])
                         print("Сумма: ", record.split("/")[3].split("=")[1])
